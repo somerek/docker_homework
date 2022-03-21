@@ -1,0 +1,24 @@
+FROM python:3.8-slim as py-image
+FROM py-image as builder
+WORKDIR /opt/app
+RUN pip install --upgrade pip
+COPY lib_catalog/requirements.txt /opt/app/requirements.txt
+RUN pip install -r requirements.txt
+
+FROM py-image
+RUN apt update&&apt install -y curl
+ENV dir=/usr/local/bin
+COPY --from=builder ${dir} ${dir}
+ENV dir=/usr/local/lib/python3.8/site-packages
+COPY --from=builder ${dir} ${dir}
+COPY lib_catalog .
+
+EXPOSE 8000
+RUN sed -i 's/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \[\"\*\"\]/g' lib_catalog/settings.py && \
+    echo >> lib_catalog/settings.py && \
+    echo CORS_ORIGIN_ALLOW_ALL = True >> lib_catalog/settings.py
+
+COPY ./entrypoint.sh .
+#ARG django_pass
+CMD [ "sh", "-c", "./entrypoint.sh ${django_pass}"]
+HEALTHCHECK --interval=5s --timeout=5s --retries=5 CMD curl --fail http://localhost:8000/admin/login/ || exit 1
