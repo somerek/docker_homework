@@ -44,3 +44,4 @@ run3.sh
 ### Результат
 
 ![](Screenshot_3.png)
+![](Screenshot_4.png)
