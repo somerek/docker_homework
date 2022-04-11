@@ -10,7 +10,7 @@ services:
     volumes:
     - db-volume:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U django"]
+      test: ["CMD-SHELL", "pg_isready -U django -d django"]
       interval: 5s
       timeout: 5s
       retries: 5
